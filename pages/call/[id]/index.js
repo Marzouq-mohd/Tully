@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/router";
 import {
   ChevronLeft,
   MessageSquare,
@@ -12,16 +13,17 @@ import {
 } from "react-feather";
 import firebase from "firebase/app";
 import "firebase/firestore";
-import initFirebase from "../services/firebase";
+import initFirebase from "../../../services/firebase";
 
 initFirebase();
 
 export default function Call() {
+  const firestore = firebase.firestore();
   const webcamVideo = useRef(null);
   const conection = useRef(null);
   const remoteStream = useRef(null);
   const remoteVideo = useRef(null);
-  const firestore = firebase.firestore();
+  const callInput = useRef(null);
   const servers = {
     iceServers: [
       {
@@ -33,11 +35,14 @@ export default function Call() {
     ],
     iceCandidatePoolSize: 10,
   };
+  const router = useRouter();
+  const { id } = router.query;
   // Global State
   // const [pc, SetPc] = useState(0);
   useEffect(() => {
     conection.current = new RTCPeerConnection(servers);
-    webcamButton();
+    console.log(id);
+    // webcamButton();
   });
   // HTML elements
   // const webcamButton = React.createRef();
@@ -72,12 +77,14 @@ export default function Call() {
     // };
 
     webcamVideo.current.srcObject = localStream;
+    // remoteVideo.current.srcObject = remoteStream;
     // webcamVideo.srcObject = localStream;
     // remoteVideo.srcObject = remoteStream;
 
     // callButton.disabled = false;
     // answerButton.disabled = false;
     // webcamButton.disabled = true;
+    admitGuest();
   };
   const admitGuest = async () => {
     remoteStream.current = new MediaStream();
@@ -88,24 +95,27 @@ export default function Call() {
       });
     };
     remoteVideo.current.srcObject = remoteStream;
+
+    callButton();
   };
   // 2. Create an offer
   const callButton = async () => {
     // Reference Firestore collections for signaling
-    const callDoc = firestore.collection("calls").doc();
+    // const callDoc = firestore.collection("calls").doc();
+    const callDoc = localStorage.getItem("callDoc");
     const offerCandidates = callDoc.collection("offerCandidates");
     const answerCandidates = callDoc.collection("answerCandidates");
 
-    callInput.value = callDoc.id;
+    // callInput.current = callDoc.id;
 
     // Get candidates for caller, save to db
-    pc.onicecandidate = (event) => {
+    pc.current.onicecandidate = (event) => {
       event.candidate && offerCandidates.add(event.candidate.toJSON());
     };
 
     // Create offer
-    const offerDescription = await pc.createOffer();
-    await pc.setLocalDescription(offerDescription);
+    const offerDescription = await pc.current.createOffer();
+    await pc.current.setLocalDescription(offerDescription);
 
     const offer = {
       sdp: offerDescription.sdp,
@@ -117,9 +127,9 @@ export default function Call() {
     // Listen for remote answer
     callDoc.onSnapshot((snapshot) => {
       const data = snapshot.data();
-      if (!pc.currentRemoteDescription && data?.answer) {
+      if (!pc.current.currentRemoteDescription && data?.answer) {
         const answerDescription = new RTCSessionDescription(data.answer);
-        pc.setRemoteDescription(answerDescription);
+        pc.current.setRemoteDescription(answerDescription);
       }
     });
 
@@ -128,17 +138,17 @@ export default function Call() {
       snapshot.docChanges().forEach((change) => {
         if (change.type === "added") {
           const candidate = new RTCIceCandidate(change.doc.data());
-          pc.addIceCandidate(candidate);
+          pc.current.addIceCandidate(candidate);
         }
       });
     });
 
-    hangupButton.disabled = false;
+    // hangupButton.disabled = false;
   };
 
   // 3. Answer the call with the unique ID
   const answerButton = async () => {
-    const callId = callInput.value;
+    const callId = id;
     const callDoc = firestore.collection("calls").doc(callId);
     const answerCandidates = callDoc.collection("answerCandidates");
     const offerCandidates = callDoc.collection("offerCandidates");
@@ -173,7 +183,7 @@ export default function Call() {
     });
   };
   return (
-    <div className={"h-screen grid grid-cols-3 grid-flow-col gap-8 px-12"}>
+    <div className={"h-screen md:grid grid-cols-3 grid-flow-col gap-8 px-12"}>
       <section className={"col-span-2 my-4"}>
         <header className={""}>
           <div
@@ -188,7 +198,7 @@ export default function Call() {
                 }
               >
                 <ChevronLeft
-                  onClick={admitGuest}
+                  onClick={answerButton}
                   className={"h-4 stroke-current text-gray-500"}
                 />
               </div>
@@ -393,7 +403,9 @@ export default function Call() {
           </div>
         </main>
       </section>
-      <section className={"col-span-1 rounded-xl bg-gray-200 my-4"}>
+      <section
+        className={"col-span-1 rounded-xl bg-gray-200 my-4 md:block hidden"}
+      >
         <header
           className={
             "py-5 px-4 border-b border-solid border-gray-300 flex justify-between"
