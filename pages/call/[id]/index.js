@@ -20,7 +20,7 @@ initFirebase();
 export default function Call() {
   const firestore = firebase.firestore();
   const webcamVideo = useRef(null);
-  const conection = useRef(null);
+  const connection = useRef(null);
   const remoteStream = useRef(null);
   const remoteVideo = useRef(null);
   const callInput = useRef(null);
@@ -38,9 +38,8 @@ export default function Call() {
   const router = useRouter();
   const { id } = router.query;
   // Global State
-  // const [pc, SetPc] = useState(0);
   useEffect(() => {
-    conection.current = new RTCPeerConnection(servers);
+    connection.current = new RTCPeerConnection(servers);
     // console.log(id);
     webcamButton();
   });
@@ -66,11 +65,11 @@ export default function Call() {
 
     // Push tracks from local stream to peer connection
     localStream.getTracks().forEach((track) => {
-      conection.current.addTrack(track, localStream);
+      connection.current.addTrack(track, localStream);
     });
 
     // Pull tracks from remote stream, add to video stream
-    // conection.current.ontrack = (event) => {
+    // connection.current.ontrack = (event) => {
     //   event.streams[0].getTracks().forEach((track) => {
     //     remoteStream.addTrack(track);
     //   });
@@ -89,7 +88,7 @@ export default function Call() {
   const admitGuest = async () => {
     remoteStream.current = new MediaStream();
     // Pull tracks from remote stream, add to video stream
-    conection.current.ontrack = (event) => {
+    connection.current.ontrack = (event) => {
       event.streams[0].getTracks().forEach((track) => {
         remoteStream.addTrack(track);
       });
@@ -109,13 +108,13 @@ export default function Call() {
     // callInput.current = callDoc.id;
 
     // Get candidates for caller, save to db
-    pc.current.onicecandidate = (event) => {
+    connection.current.onicecandidate = (event) => {
       event.candidate && offerCandidates.add(event.candidate.toJSON());
     };
 
     // Create offer
-    const offerDescription = await pc.current.createOffer();
-    await pc.current.setLocalDescription(offerDescription);
+    const offerDescription = await connection.current.createOffer();
+    await connection.current.setLocalDescription(offerDescription);
 
     const offer = {
       sdp: offerDescription.sdp,
@@ -127,9 +126,9 @@ export default function Call() {
     // Listen for remote answer
     callDoc.onSnapshot((snapshot) => {
       const data = snapshot.data();
-      if (!pc.current.currentRemoteDescription && data?.answer) {
+      if (!connection.current.currentRemoteDescription && data?.answer) {
         const answerDescription = new RTCSessionDescription(data.answer);
-        pc.current.setRemoteDescription(answerDescription);
+        connection.current.setRemoteDescription(answerDescription);
       }
     });
 
@@ -138,7 +137,7 @@ export default function Call() {
       snapshot.docChanges().forEach((change) => {
         if (change.type === "added") {
           const candidate = new RTCIceCandidate(change.doc.data());
-          pc.current.addIceCandidate(candidate);
+          connection.current.addIceCandidate(candidate);
         }
       });
     });
@@ -154,19 +153,19 @@ export default function Call() {
     const answerCandidates = callDoc.collection("answerCandidates");
     const offerCandidates = callDoc.collection("offerCandidates");
 
-    pc.current.onicecandidate = (event) => {
+    connection.current.onicecandidate = (event) => {
       event.candidate && answerCandidates.add(event.candidate.toJSON());
     };
 
     const callData = (await callDoc.get()).data();
 
     const offerDescription = callData.offer;
-    await pc.current.setRemoteDescription(
+    await connection.current.setRemoteDescription(
       new RTCSessionDescription(offerDescription)
     );
 
-    const answerDescription = await pc.current.createAnswer();
-    await pc.current.setLocalDescription(answerDescription);
+    const answerDescription = await connection.current.createAnswer();
+    await connection.current.setLocalDescription(answerDescription);
 
     const answer = {
       type: answerDescription.type,
@@ -180,7 +179,7 @@ export default function Call() {
         console.log(change);
         if (change.type === "added") {
           let data = change.doc.data();
-          pc.current.addIceCandidate(new RTCIceCandidate(data));
+          connection.current.addIceCandidate(new RTCIceCandidate(data));
         }
       });
     });
