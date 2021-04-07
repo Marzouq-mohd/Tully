@@ -29,7 +29,7 @@ export default function Home() {
     const callDoc = firestore.collection("calls").doc();
     // const offerCandidates = callDoc.collection("offerCandidates");
     // const answerCandidates = callDoc.collection("answerCandidates");
-    localStorage.setItem("callDoc", callDoc);
+    localStorage.setItem("callDoc", JSON.stringify(callDoc));
     // console.log(JSON.stringify(callDoc));
     // callInput.current = callDoc.id;
     e.preventDefault();

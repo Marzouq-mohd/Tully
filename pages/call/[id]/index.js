@@ -102,7 +102,7 @@ export default function Call() {
   const callButton = async () => {
     // Reference Firestore collections for signaling
     // const callDoc = firestore.collection("calls").doc();
-    const callDoc = localStorage.getItem("callDoc");
+    const callDoc = JSON.parse(localStorage.getItem("callDoc"));
     const offerCandidates = callDoc.collection("offerCandidates");
     const answerCandidates = callDoc.collection("answerCandidates");
 
@@ -149,6 +149,7 @@ export default function Call() {
   // 3. Answer the call with the unique ID
   const answerButton = async () => {
     const callId = id;
+    // const callDoc = firestore.collection("calls").doc(callId);
     const callDoc = firestore.collection("calls").doc(callId);
     const answerCandidates = callDoc.collection("answerCandidates");
     const offerCandidates = callDoc.collection("offerCandidates");
