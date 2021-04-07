@@ -41,7 +41,7 @@ export default function Call() {
   // const [pc, SetPc] = useState(0);
   useEffect(() => {
     conection.current = new RTCPeerConnection(servers);
-    console.log(id);
+    // console.log(id);
     webcamButton();
   });
   // HTML elements
@@ -153,17 +153,19 @@ export default function Call() {
     const answerCandidates = callDoc.collection("answerCandidates");
     const offerCandidates = callDoc.collection("offerCandidates");
 
-    pc.onicecandidate = (event) => {
+    pc.current.onicecandidate = (event) => {
       event.candidate && answerCandidates.add(event.candidate.toJSON());
     };
 
     const callData = (await callDoc.get()).data();
 
     const offerDescription = callData.offer;
-    await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
+    await pc.current.setRemoteDescription(
+      new RTCSessionDescription(offerDescription)
+    );
 
-    const answerDescription = await pc.createAnswer();
-    await pc.setLocalDescription(answerDescription);
+    const answerDescription = await pc.current.createAnswer();
+    await pc.current.setLocalDescription(answerDescription);
 
     const answer = {
       type: answerDescription.type,
@@ -177,7 +179,7 @@ export default function Call() {
         console.log(change);
         if (change.type === "added") {
           let data = change.doc.data();
-          pc.addIceCandidate(new RTCIceCandidate(data));
+          pc.current.addIceCandidate(new RTCIceCandidate(data));
         }
       });
     });
