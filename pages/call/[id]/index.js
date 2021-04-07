@@ -42,7 +42,7 @@ export default function Call() {
   useEffect(() => {
     conection.current = new RTCPeerConnection(servers);
     console.log(id);
-    // webcamButton();
+    webcamButton();
   });
   // HTML elements
   // const webcamButton = React.createRef();
