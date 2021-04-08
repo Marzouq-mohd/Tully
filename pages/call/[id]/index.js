@@ -23,7 +23,7 @@ export default function Call() {
   const connection = useRef(null);
   const remoteStream = useRef(null);
   const remoteVideo = useRef(null);
-  const callInput = useRef(null);
+  // const callInput = useRef(null);
   const servers = {
     iceServers: [
       {
@@ -59,7 +59,7 @@ export default function Call() {
 
     localStream = await navigator.mediaDevices.getUserMedia({
       video: true,
-      audio: true,
+      // audio: true,
     });
     // remoteStream.current = new MediaStream();
 
@@ -90,10 +90,10 @@ export default function Call() {
     // Pull tracks from remote stream, add to video stream
     connection.current.ontrack = (event) => {
       event.streams[0].getTracks().forEach((track) => {
-        remoteStream.addTrack(track);
+        remoteStream.current.addTrack(track);
       });
     };
-    remoteVideo.current.srcObject = remoteStream;
+    remoteVideo.current.srcObject = remoteStream.current;
 
     callButton();
   };
