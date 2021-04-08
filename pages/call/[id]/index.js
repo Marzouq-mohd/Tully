@@ -19,9 +19,9 @@ initFirebase();
 
 export default function Call() {
   const firestore = firebase.firestore();
-  const webcamVideo = useRef(null);
   const connection = useRef(null);
   const remoteStream = useRef(null);
+  const webcamVideo = useRef(null);
   const remoteVideo = useRef(null);
   // const callInput = useRef(null);
   const servers = {
@@ -59,9 +59,9 @@ export default function Call() {
 
     localStream = await navigator.mediaDevices.getUserMedia({
       video: true,
-      // audio: true,
+      audio: true,
     });
-    // remoteStream.current = new MediaStream();
+    remoteStream.current = new MediaStream();
 
     // Push tracks from local stream to peer connection
     localStream.getTracks().forEach((track) => {
@@ -69,11 +69,11 @@ export default function Call() {
     });
 
     // Pull tracks from remote stream, add to video stream
-    // connection.current.ontrack = (event) => {
-    //   event.streams[0].getTracks().forEach((track) => {
-    //     remoteStream.addTrack(track);
-    //   });
-    // };
+    connection.current.ontrack = (event) => {
+      event.streams[0].getTracks().forEach((track) => {
+        remoteStream.current.addTrack(track);
+      });
+    };
 
     webcamVideo.current.srcObject = localStream;
     // remoteVideo.current.srcObject = remoteStream;
@@ -83,23 +83,24 @@ export default function Call() {
     // callButton.disabled = false;
     // answerButton.disabled = false;
     // webcamButton.disabled = true;
-    admitGuest();
-  };
-  const admitGuest = async () => {
-    remoteStream.current = new MediaStream();
-    // Pull tracks from remote stream, add to video stream
-    connection.current.ontrack = (event) => {
-      event.streams[0].getTracks().forEach((track) => {
-        remoteStream.current.addTrack(track);
-      });
-    };
-    remoteVideo.current.srcObject = remoteStream.current;
-
     callButton();
   };
+  // const admitGuest = async () => {
+  //   remoteStream.current = new MediaStream();
+  //   // Pull tracks from remote stream, add to video stream
+  //   connection.current.ontrack = (event) => {
+  //     event.streams[0].getTracks().forEach((track) => {
+  //       remoteStream.current.addTrack(track);
+  //     });
+  //   };
+  //   remoteVideo.current.srcObject = remoteStream.current;
+
+  //   callButton();
+  // };
   // 2. Create an offer
   const callButton = async () => {
     // Reference Firestore collections for signaling
+    // console.log(id);
     const callDoc = firestore.collection("calls").doc(id);
     const offerCandidates = callDoc.collection("offerCandidates");
     const answerCandidates = callDoc.collection("answerCandidates");
@@ -142,6 +143,7 @@ export default function Call() {
     });
 
     // hangupButton.disabled = false;
+    answerButton();
   };
 
   // 3. Answer the call with the unique ID
