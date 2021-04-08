@@ -150,6 +150,7 @@ export default function Call() {
 
   // 3. Answer the call with the unique ID
   const answerButton = async () => {
+    alert("trig");
     const callId = id;
     // const callDoc = firestore.collection("calls").doc(callId);
     const callDoc = firestore.collection("calls").doc("tdYzjohmYNzdnOjwt3YX");
