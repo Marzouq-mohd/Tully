@@ -100,8 +100,7 @@ export default function Call() {
   // 2. Create an offer
   const callButton = async () => {
     // Reference Firestore collections for signaling
-    // const callDoc = firestore.collection("calls").doc();
-    const callDoc = JSON.parse(localStorage.getItem("callDoc"));
+    const callDoc = firestore.collection("calls").doc(id);
     const offerCandidates = callDoc.collection("offerCandidates");
     const answerCandidates = callDoc.collection("answerCandidates");
 
