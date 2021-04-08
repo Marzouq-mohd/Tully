@@ -101,7 +101,6 @@ export default function Call() {
   // 2. Create an offer
   const callButton = async () => {
     // Reference Firestore collections for signaling
-    // console.log(id);
     const callDoc = firestore.collection("calls").doc(id);
     const offerCandidates = callDoc.collection("offerCandidates");
     const answerCandidates = callDoc.collection("answerCandidates");
@@ -138,6 +137,7 @@ export default function Call() {
       snapshot.docChanges().forEach((change) => {
         if (change.type === "added") {
           const candidate = new RTCIceCandidate(change.doc.data());
+          console.log(candidate);
           connection.current.addIceCandidate(candidate);
         }
       });
@@ -181,6 +181,7 @@ export default function Call() {
         console.log(change);
         if (change.type === "added") {
           let data = change.doc.data();
+          // console.log(data);
           connection.current.addIceCandidate(new RTCIceCandidate(data));
         }
       });
