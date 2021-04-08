@@ -84,7 +84,7 @@ export default function Call() {
     // callButton.disabled = false;
     // answerButton.disabled = false;
     // webcamButton.disabled = true;
-    callButton();
+    // callButton();
   };
   // const admitGuest = async () => {
   //   remoteStream.current = new MediaStream();
@@ -129,6 +129,7 @@ export default function Call() {
       if (!connection.current.currentRemoteDescription && data?.answer) {
         const answerDescription = new RTCSessionDescription(data.answer);
         connection.current.setRemoteDescription(answerDescription);
+        console.log("execution stage");
       }
     });
 
@@ -137,8 +138,8 @@ export default function Call() {
       snapshot.docChanges().forEach((change) => {
         if (change.type === "added") {
           const candidate = new RTCIceCandidate(change.doc.data());
-          console.log(candidate);
-          connection.current.addIceCandidate(candidate);
+          // console.log(candidate);
+          // connection.current.addIceCandidate(candidate);
         }
       });
     });
@@ -212,7 +213,10 @@ export default function Call() {
               </h1>
             </div>
             <div className={""}>
-              <MessageSquare className={" stroke-current text-gray-500"} />
+              <MessageSquare
+                onClick={callButton}
+                className={" stroke-current text-gray-500"}
+              />
             </div>
           </div>
           <div className={"py-5"}>
