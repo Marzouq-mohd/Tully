@@ -77,7 +77,7 @@ export default function Call() {
     };
 
     webcamVideo.current.srcObject = localStream;
-    // remoteVideo.current.srcObject = remoteStream;
+    remoteVideo.current.srcObject = remoteStream;
     // webcamVideo.srcObject = localStream;
     // remoteVideo.srcObject = remoteStream;
 
