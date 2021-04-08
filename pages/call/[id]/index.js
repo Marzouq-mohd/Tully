@@ -20,7 +20,7 @@ initFirebase();
 export default function Call() {
   const firestore = firebase.firestore();
   const connection = useRef(null);
-  const remoteStream = useRef(null);
+  // const remoteStream = useRef(null);
   const webcamVideo = useRef(null);
   const remoteVideo = useRef(null);
   // const callInput = useRef(null);
@@ -56,12 +56,13 @@ export default function Call() {
 
   const webcamButton = async () => {
     let localStream = null;
+    let remoteStream = null;
 
     localStream = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
     });
-    remoteStream.current = new MediaStream();
+    remoteStream = new MediaStream();
 
     // Push tracks from local stream to peer connection
     localStream.getTracks().forEach((track) => {
@@ -71,7 +72,7 @@ export default function Call() {
     // Pull tracks from remote stream, add to video stream
     connection.current.ontrack = (event) => {
       event.streams[0].getTracks().forEach((track) => {
-        remoteStream.current.addTrack(track);
+        remoteStream.addTrack(track);
       });
     };
 
@@ -143,7 +144,7 @@ export default function Call() {
     });
 
     // hangupButton.disabled = false;
-    answerButton();
+    // answerButton();
   };
 
   // 3. Answer the call with the unique ID
