@@ -10,28 +10,11 @@ initFirebase();
 export default function Home() {
   const firestore = firebase.firestore();
   const router = useRouter();
-  // const conection = useRef(null);
-  // const servers = {
-  //   iceServers: [
-  //     {
-  //       urls: [
-  //         "stun:stun1.l.google.com:19302",
-  //         "stun:stun2.l.google.com:19302",
-  //       ],
-  //     },
-  //   ],
-  //   iceCandidatePoolSize: 10,
-  // };
   useEffect(() => {
     // conection.current = new RTCPeerConnection(servers);
   });
   const createOffer = async (e) => {
     const callDoc = firestore.collection("calls").doc();
-    // const offerCandidates = callDoc.collection("offerCandidates");
-    // const answerCandidates = callDoc.collection("answerCandidates");
-    localStorage.setItem("callDoc", JSON.stringify(callDoc));
-    // console.log(JSON.stringify(callDoc));
-    // callInput.current = callDoc.id;
     e.preventDefault();
     router.push(`/call/${callDoc.id}`);
   };

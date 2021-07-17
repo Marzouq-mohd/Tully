@@ -20,10 +20,18 @@ initFirebase();
 export default function Call() {
   const firestore = firebase.firestore();
   const connection = useRef(null);
-  // const remoteStream = useRef(null);
+  const localStream = useRef(null);
+  const remoteStream = useRef(null);
   const webcamVideo = useRef(null);
   const remoteVideo = useRef(null);
-  // const callInput = useRef(null);
+  // const [media, setMedia] = useState({ video: true, audio: true });
+  const [video, setVideo] = useState(true);
+  const [audio, setAudio] = useState(true);
+  // const video = media.video;
+  const videoW = useRef(true);
+  // const audio = media.audio;
+  const toggleVideoState = () => setVideo(!video);
+  const incrementCounter = () => setCounterState(counterState + 1);
   const servers = {
     iceServers: [
       {
@@ -37,11 +45,9 @@ export default function Call() {
   };
   const router = useRouter();
   const { id } = router.query;
-  // Global State
   useEffect(() => {
     connection.current = new RTCPeerConnection(servers);
-    // console.log(id);
-    webcamButton();
+    startMedia();
   });
   // HTML elements
   // const webcamButton = React.createRef();
@@ -54,37 +60,53 @@ export default function Call() {
   // const hangupButton = document.getElementById("hangupButton");
   // 1. Setup media sources
 
-  const webcamButton = async () => {
-    let localStream = null;
-    let remoteStream = null;
-
-    localStream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
-    remoteStream = new MediaStream();
+  const startMedia = async (options) => {
+    options = options || null;
+    localStream.current = await navigator.mediaDevices.getUserMedia(
+      options
+        ? options
+        : {
+            video: true,
+            audio: true,
+          }
+    );
+    remoteStream.current = new MediaStream();
 
     // Push tracks from local stream to peer connection
-    localStream.getTracks().forEach((track) => {
-      connection.current.addTrack(track, localStream);
+    localStream.current.getTracks().forEach((track) => {
+      connection.current.addTrack(track, localStream.current);
     });
 
     // Pull tracks from remote stream, add to video stream
     connection.current.ontrack = (event) => {
       event.streams[0].getTracks().forEach((track) => {
-        remoteStream.addTrack(track);
+        remoteStream.current.addTrack(track);
       });
     };
 
-    webcamVideo.current.srcObject = localStream;
-    remoteVideo.current.srcObject = remoteStream;
-    // webcamVideo.srcObject = localStream;
-    // remoteVideo.srcObject = remoteStream;
-
-    // callButton.disabled = false;
-    // answerButton.disabled = false;
-    // webcamButton.disabled = true;
-    // callButton();
+    webcamVideo.current.srcObject = localStream.current;
+    remoteVideo.current.srcObject = remoteStream.current;
+    webcamVideo.current.muted = true;
+  };
+  const toggleVideo = () => {
+    if (video) {
+      localStream.current.getVideoTracks()[0].stop();
+      webcamVideo.current.pause();
+      webcamVideo.current.srcObject = null;
+      // console.log(localStream.current.getVideoTracks());
+      // videoW.current = false;
+    } else if (!video) {
+      // startMedia();
+      // videoW.current = true;
+    }
+    toggleVideoState();
+    console.log(videoW, video);
+  };
+  const toggleAudio = () => {
+    audio ? localStream.current.getAudioTracks()[0].stop() : console.log(media);
+    // setMedia((prevState) => {
+    //   return { ...prevState, audio: !prevState.audio };
+    // });
   };
   // const admitGuest = async () => {
   //   remoteStream.current = new MediaStream();
@@ -211,7 +233,7 @@ export default function Call() {
                 />
               </div>
               <h1 className={"text-gray-900 font-semibold px-4 text-lg"}>
-                Overview of new real estate proposals
+                Overview of new real estate proposals {video}
               </h1>
             </div>
             <div className={""}>
@@ -266,7 +288,7 @@ export default function Call() {
             >
               <div className="flex items-center col-start-1 col-end-2">
                 <video
-                  className={"rounded-xl "}
+                  className={"rounded-xl object-cover w-full h-full"}
                   style={{ transform: "rotateY(180deg)" }}
                   ref={webcamVideo}
                   autoPlay
@@ -275,7 +297,7 @@ export default function Call() {
               </div>
               <div className="flex items-center">
                 <video
-                  className={"rounded-xl "}
+                  className={"rounded-xl object-cover w-full h-full"}
                   style={{ transform: "rotateY(180deg)" }}
                   ref={remoteVideo}
                   autoPlay
@@ -352,7 +374,10 @@ export default function Call() {
                     "bg-gray-400 inline-block px-4 py-4 rounded-full mx-2"
                   }
                 >
-                  <MicOff className={"fill-current text-white h-4 w-4"} />
+                  <MicOff
+                    className={"fill-current text-white h-4 w-4"}
+                    onClick={toggleAudio}
+                  />
                 </div>
                 <button
                   className={
@@ -368,8 +393,9 @@ export default function Call() {
                   /> */}
                 </button>
                 <div
+                  onClick={toggleVideo}
                   className={
-                    "bg-gray-400 inline-block px-4 py-4 rounded-full mx-2"
+                    "bg-gray-400 inline-block px-4 py-4 rounded-full mx-2 cursor-pointer"
                   }
                 >
                   <Video className={"fill-current text-white h-4 w-4"} />
