@@ -25,7 +25,6 @@ import {
 import swal from "sweetalert";
 // import { withAuthUser, AuthAction } from "next-firebase-auth";
 import FirebaseAuth from "../../../components/FirebaseAuth";
-// import SocketIOClient from "socket.io-client";
 
 initFirebase();
 
