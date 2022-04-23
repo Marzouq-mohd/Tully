@@ -1,1 +1,1 @@
-This is a [Tully](https://nextjs.org/) a video conferencing & facial expression recognition project created with [next.js](https://nextjs.org) [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+This is a [Tully](https://tully-marzouq.vercel.app/) a video conferencing & facial expression recognition project created with [next.js](https://nextjs.org) [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
